@@ -1,0 +1,9 @@
+[versions]
+kotlin = "2.1.0-Beta2"
+
+[libraries]
+kotlin-native-utils = { group = "org.jetbrains.kotlin", name = "kotlin-native-utils", version.ref = "kotlin" }
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
