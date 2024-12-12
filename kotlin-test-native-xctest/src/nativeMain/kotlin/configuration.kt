@@ -4,14 +4,12 @@
  */
 @file:Suppress("INVISIBLE_REFERENCE", "INVISIBLE_MEMBER")
 
-import kotlinx.cinterop.*
 import kotlin.native.internal.test.*
 import platform.Foundation.NSInvocation
 import platform.Foundation.NSBundle
 import platform.Foundation.NSProcessInfo
 import platform.Foundation.NSStringFromSelector
 import platform.XCTest.*
-import platform.objc.*
 
 // Top level suite name used to hold all Native tests
 internal const val TOP_LEVEL_SUITE = "Kotlin/Native test suite"

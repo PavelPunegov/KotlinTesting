@@ -1,4 +1,3 @@
-import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.konan.target.*
 
@@ -12,6 +11,26 @@ plugins {
 repositories {
     mavenCentral()
 }
+
+/**
+ * Registers a task to copy the XCTest framework to the build directory for the specified [KonanTarget].
+ *
+ * @param target The [KonanTarget] for which the copy framework task should be registered.
+ * @return The [TaskProvider] representing the registered copy framework task.
+ */
+fun registerCopyFrameworkTask(target: KonanTarget): TaskProvider<Sync> =
+    tasks.register<Sync>("${target}FrameworkCopy") {
+        into(layout.buildDirectory.dir("$target/Frameworks"))
+        from(
+            providers.of(DevFrameworkPathValueSource::class) {
+                parameters {
+                    konanTarget = target
+                }
+            }
+        ) {
+            include("XCTest.framework/**")
+        }
+    }
 
 /**
  * Returns [Provider] with the path to Xcode Developers frameworks for the specified [KonanTarget].
@@ -41,10 +60,15 @@ kotlin {
         addIfEnabledOnHost(iosSimulatorArm64())
 
         forEach {
+            val copyTask = registerCopyFrameworkTask(it.konanTarget)
             it.compilations.all {
                 cinterops {
                     register("XCTest") {
-                        compilerOpts("-iframework", it.konanTarget.devFrameworksPathProvider().get())
+                        compilerOpts("-iframework", copyTask.map { it.destinationDir }.get().absolutePath)
+                        // cinterop task should depend on the framework copy task
+                        tasks.named(interopProcessingTaskName).configure {
+                            dependsOn(copyTask)
+                        }
                     }
                 }
             }
