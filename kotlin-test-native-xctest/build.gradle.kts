@@ -71,6 +71,11 @@ kotlin {
                         }
                     }
                 }
+                compileTaskProvider.configure {
+                    compilerOptions {
+                        freeCompilerArgs.add("-Xdont-warn-on-error-suppression")
+                    }
+                }
             }
         }
     }
