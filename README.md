@@ -1,3 +1,7 @@
+# Kotlin Testing
+
+Kotlin Multiplatform Library that provides an ability to run Kotlin tests (`kotlin.test`) using XCTest framework.
+
 ## Writing tests
 
 Tests can be written both in Kotlin and Swift.

@@ -32,16 +32,6 @@ fun registerCopyFrameworkTask(target: KonanTarget): TaskProvider<Sync> =
         }
     }
 
-/**
- * Returns [Provider] with the path to Xcode Developers frameworks for the specified [KonanTarget].
- */
-fun KonanTarget.devFrameworksPathProvider(): Provider<String> =
-    providers.of(DevFrameworkPathValueSource::class) {
-        parameters {
-            konanTarget = this@devFrameworksPathProvider
-        }
-    }
-
 // region Kotlin Multiplatform build configuration
 
 val nativeTargets = mutableListOf<KotlinNativeTarget>()
