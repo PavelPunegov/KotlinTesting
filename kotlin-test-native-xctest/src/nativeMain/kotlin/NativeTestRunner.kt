@@ -32,12 +32,18 @@ class XCTestCaseWrapper(invocation: NSInvocation, val testCase: TestCase) : XCTe
     private val testName = testCase.fullName
 
     fun run() {
-        if (ignored) {
-            // FIXME: to skip the test XCTSkip() should be used.
-            //  But it is not possible to do that due to the KT-43719 and not implemented exception importing.
-            //  For example, _XCTSkipHandler(testName, 0U, "Test $testName is ignored") fails with 'Uncaught Kotlin exception'.
-            //  So, just don't run the test. It will be seen as passed in XCode, but K/N TestListener correctly processes that.
-            return
+        check (!ignored) {
+            // In general, to skip the test `XCTSkip()` should be used,
+            // but it is not possible due to the KT-43719 and not implemented exception importing.
+            // To overcome this issue, we use a native `skipImplementation` method that returns an implementation
+            // that invokes `XCTSkip()`
+            """
+                Test $testName should be ignored and not run with this method.
+                The test machinery failed to replace runner with the special method.
+                Debug info:
+                - selector: ${invocation?.selector}
+                - signature: ${invocation?.methodSignature}
+            """.trimIndent()
         }
         try {
             testCase.doRun()
@@ -129,11 +135,18 @@ class XCTestCaseWrapper(invocation: NSInvocation, val testCase: TestCase) : XCTe
          * Creates and adds method to the metaclass with implementation block
          * that gets an XCTestCase instance as self to be run.
          */
-        private fun createRunMethod(selector: SEL) {
+        private fun createRunMethod(selector: SEL, isIgnored: Boolean = false) {
+            val imp = if (isIgnored) {
+                // A special implementation that makes current test execution to skip a test case
+                skipImplementation()
+            } else {
+                imp_implementationWithBlock(this::runner)
+            }
+
             val result = class_addMethod(
                 cls = this.`class`(),
                 name = selector,
-                imp = imp_implementationWithBlock(this::runner),
+                imp = imp,
                 types = "v@:" // Obj-C type encodings: v (returns void), @ (id self), : (SEL sel)
             )
             check(result) {
@@ -160,15 +173,18 @@ class XCTestCaseWrapper(invocation: NSInvocation, val testCase: TestCase) : XCTe
          * @see runner
          * @see XCTestCaseWrapper.run
          */
-        override fun testInvocations(): List<NSInvocation> = testMethodsNames.map {
-            val selector = NSSelectorFromString(it)
-            createRunMethod(selector)
+        override fun testInvocations(): List<NSInvocation> = testCases.map {
+            val name = it.fullName
+            val selector = NSSelectorFromString(name)
+
+            createRunMethod(selector, isIgnored = it.ignored)
+
             this.instanceMethodSignatureForSelector(selector)?.let { signature ->
                 @Suppress("CAST_NEVER_SUCCEEDS")
                 val invocation = NSInvocation.invocationWithMethodSignature(signature as NSMethodSignature)
                 invocation.setSelector(selector)
                 invocation
-            } ?: error("Was unable to create NSInvocation for method $it")
+            } ?: error("Was unable to create NSInvocation for method $name")
         }
     }
 }

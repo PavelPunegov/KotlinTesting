@@ -96,10 +96,10 @@ private fun testArguments(key: String): Array<String> {
     return emptyArray()
 }
 
-internal val testMethodsNames: List<String>
-    get() = testSettings.testSuites.toList()
+internal val testCases: List<TestCase>
+    get() = testSettings.testSuites
         .flatMap { testSuite ->
-            testSuite.testCases.values.map { it.fullName }
+            testSuite.testCases.values
         }
 
 internal val TestCase.fullName get() = "${suite.name}.$name"

@@ -7,3 +7,13 @@ compilerOpts = -framework XCTest
 linkerOpts = -framework XCTest
 
 foreignExceptionMode = objc-wrap
+
+---
+#import <objc/runtime.h>
+
+static IMP skipImplementation() {
+    return imp_implementationWithBlock(^void(id _self, SEL _sel) {
+        // Use the XCTSkip function to skip the test with the provided reason
+        XCTSkip(@"Test was skipped (ignored with @Ignore annotation)");
+    });
+}
