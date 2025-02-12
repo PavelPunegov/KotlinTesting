@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2023 JetBrains s.r.o. and Kotlin Programming Language contributors.
+1 * Copyright 2010-2025 JetBrains s.r.o. and Kotlin Programming Language contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 @file:Suppress("INVISIBLE_REFERENCE", "INVISIBLE_MEMBER")
@@ -25,7 +25,7 @@ private lateinit var testSettings: TestSettings
 
 /**
  * This is an entry-point of XCTestSuites and XCTestCases generation.
- * Function returns the XCTest's top level TestSuite that holds all the test cases
+ * Function returns the XCTest's top-level TestSuite that holds all the test cases
  * with K/N tests.
  * This test suite can be run by either native launcher compiled to bundle or
  * by the other test suite (e.g. compiled as a framework).
@@ -43,7 +43,7 @@ fun setupXCTestSuite(): XCTestSuite {
         "Test settings wasn't set. Check provided arguments and test suites"
     }
 
-    // Set test observer that will log test execution
+    // Set a test observer that will log test execution
     XCTestObservationCenter.sharedTestObservationCenter.addTestObserver(NativeTestObserver(testSettings))
 
     if (testSettings.runTests) {
@@ -70,7 +70,7 @@ fun setupXCTestSuite(): XCTestSuite {
 @Suppress("UNCHECKED_CAST")
 private fun testArguments(key: String): Array<String> {
     (NSProcessInfo.processInfo.arguments as? List<String>)?.let {
-        // Drop the first element containing executable name.
+        // Drop the first element containing the executable name.
         // See https://developer.apple.com/documentation/foundation/nsprocessinfo/1415596-arguments
         // Then filter only relevant to the runner arguments.
         val args = it.drop(1)
@@ -109,14 +109,14 @@ private fun Collection<TestSuite>.generate(): List<XCTestSuite> {
     return this.map { suite ->
         val xcSuite = XCTestSuiteWrapper(suite)
         suite.testCases.values.map { testCase ->
-            // Produce test case wrapper from the test invocation
+            // Produce a test case wrapper from the test invocation
             testInvocations.filter {
                 it.selectorString() == testCase.fullName
             }.map { invocation ->
                 XCTestCaseWrapper(invocation, testCase)
             }.single()
         }.forEach {
-            // add test to its test suite wrappper
+            // Add a test to its suite wrapper
             xcSuite.addTest(it)
         }
         xcSuite

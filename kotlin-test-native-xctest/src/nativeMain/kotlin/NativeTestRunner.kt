@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2023 JetBrains s.r.o. and Kotlin Programming Language contributors.
+ * Copyright 2010-2025 JetBrains s.r.o. and Kotlin Programming Language contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 @file:Suppress("INVISIBLE_REFERENCE", "INVISIBLE_MEMBER")
@@ -50,10 +50,11 @@ class XCTestCaseWrapper(invocation: NSInvocation, val testCase: TestCase) : XCTe
         } catch (throwable: Throwable) {
             val stackTrace = throwable.getStackTrace()
             val failedStackLine = stackTrace.first {
-                // try to filter out kotlin.Exceptions and kotlin.test.Assertion inits to poin to the failed stack and line
+                // try to filter out kotlin.Exceptions and kotlin.test.Assertion inits
+                // to point to the failed stack and line
                 !it.contains("kfun:kotlin.")
             }
-            // Find path and line number to create source location
+            // Find path and line number to create a source location
             val matchResult = Regex("^\\d+ +.* \\((.*):(\\d+):.*\\)$").find(failedStackLine)
             val sourceLocation = if (matchResult != null) {
                 val (file, line) = matchResult.destructured
@@ -63,7 +64,7 @@ class XCTestCaseWrapper(invocation: NSInvocation, val testCase: TestCase) : XCTe
                 XCTSourceCodeLocation(testCase.suite.name, 0L)
             }
 
-            // Make a stacktrace attachment, encoding it as source code.
+            // Make stack trace attachment, encoding it as source code.
             // This makes it appear as an attachment in the XCode test results for the failed test.
             @Suppress("CAST_NEVER_SUCCEEDS")
             val stackAsPayload = (stackTrace.joinToString("\n") as? NSString)?.dataUsingEncoding(NSUTF8StringEncoding)
@@ -132,8 +133,8 @@ class XCTestCaseWrapper(invocation: NSInvocation, val testCase: TestCase) : XCTe
         }
 
         /**
-         * Creates and adds method to the metaclass with implementation block
-         * that gets an XCTestCase instance as self to be run.
+         * Creates and adds a method to the metaclass with an implementation block
+         * that gets an [XCTestCase] instance as self to be run.
          */
         private fun createRunMethod(selector: SEL, isIgnored: Boolean = false) {
             val imp = if (isIgnored) {
@@ -160,14 +161,17 @@ class XCTestCaseWrapper(invocation: NSInvocation, val testCase: TestCase) : XCTe
         /**
          * Creates Test invocations for each test method to make them resolvable by the XCTest machinery.
          *
-         * For each kotlin-test's test case make an NSInvocation with an appropriate selector that represents test name:
-         * - Create NSSelector from the given test name.
-         * - Create implementation method with block for runner method. This method accepts the instance of the XCTestCaseWrapper
-         *  to run the actual test code.
-         * - Create NSInvocation from the selector using NSMethodSignature.
+         * For each kotlin-test's test case make an [NSInvocation] with an appropriate selector
+         * that represents test name:
+         * - Create [SEL] selector from the given test name.
+         * - Create implementation method with block for runner method.
+         *   This method accepts the instance of the [XCTestCaseWrapper] to run the actual test code.
+         * - Create [NSInvocation] from the selector using [NSMethodSignature].
          *
-         * Then this NSInvocation should be used to create an instance of XCTestCaseWrapper that implements XCTestCase.
-         * When XCTest runs this instance, it invokes this invocation that passes Wrapper's instance to the `runner(...)` method.
+         * Then this [NSInvocation] should be used to create an instance of [XCTestCaseWrapper]
+         * that implements [XCTestCase].
+         * When XCTest runs this instance, it invokes this invocation
+         * that passes Wrapper's instance to the `runner(...)` method.
          *
          * @see createRunMethod
          * @see runner
@@ -192,11 +196,12 @@ class XCTestCaseWrapper(invocation: NSInvocation, val testCase: TestCase) : XCTe
 private typealias SEL = COpaquePointer?
 
 /**
- * This is a NSError-wrapper of Kotlin exception used to pass it through the XCTIssue
- * to the XCTestObservation protocol implementation [NativeTestObserver].
+ * This is a NSError-wrapper of Kotlin exception used to pass it through the [XCTIssue]
+ * to the [XCTestObservation] protocol implementation [NativeTestObserver].
  * See [NativeTestObserver.testCase] for the usage.
  */
-internal class NSErrorWithKotlinException(val kotlinException: Throwable) : NSError(NSCocoaErrorDomain, NSValidationErrorMinimum, null)
+internal class NSErrorWithKotlinException(val kotlinException: Throwable) :
+    NSError(NSCocoaErrorDomain, NSValidationErrorMinimum, null)
 
 /**
  * XCTest equivalent of K/N TestSuite.
