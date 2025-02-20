@@ -12,6 +12,13 @@ import KotlinTests
 final class swiftHostAppTests: XCTestCase {
     
     override class var defaultTestSuite: XCTestSuite {
-        return ConfigurationKt.testSuite()
+        let defaultSuite = super.defaultTestSuite
+
+        // Add all Kotlin tests to the default test suite
+        ConfigurationKt.testSuite().tests.forEach { test in
+            defaultSuite.addTest(test)
+        }
+
+        return defaultSuite
     }
 }
