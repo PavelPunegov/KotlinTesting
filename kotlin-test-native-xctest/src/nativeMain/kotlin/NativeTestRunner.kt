@@ -134,10 +134,6 @@ class XCTestCaseWrapper(invocation: NSInvocation, val testCase: TestCase) : XCTe
             )
         }
 
-        override fun testCaseWithSelector(selector: SEL): XCTestCase? {
-            return super.testCaseWithSelector(selector)
-        }
-
         /**
          * Creates and adds a method to the metaclass with an implementation block
          * that gets an [XCTestCase] instance as self to be run.
