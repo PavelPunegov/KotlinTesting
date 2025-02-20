@@ -81,22 +81,24 @@ class XCTestCaseWrapper(invocation: NSInvocation, val testCase: TestCase) : XCTe
             }
 
             // Finally, create and record an issue with all gathered data
-            val issue = XCTIssue(
-                type = type,
-                compactDescription = "$throwable in $testName",
-                detailedDescription = buildString {
-                    appendLine("Test '$testName' from '${testCase.suite.name}' failed with $throwable")
-                    throwable.cause?.let { appendLine("(caused by ${throwable.cause})") }
-                },
-                sourceCodeContext = XCTSourceCodeContext(
-                    callStackAddresses = throwable.getStackTraceAddresses(),
-                    location = sourceLocation
-                ),
-                // pass the error through the XCTest to the NativeTestObserver
-                associatedError = NSErrorWithKotlinException(throwable),
-                attachments = listOf(stackTraceAttachment)
+            recordIssue(
+                XCTIssue(
+                    type = type,
+                    compactDescription = "$throwable in $testName",
+                    detailedDescription = buildString {
+                        append("Test '${this@XCTestCaseWrapper.testName}'")
+                        appendLine("from '${this@XCTestCaseWrapper.testCase.suite.name}' failed with $throwable")
+                        throwable.cause?.let { appendLine("(caused by ${throwable.cause})") }
+                    },
+                    sourceCodeContext = XCTSourceCodeContext(
+                        callStackAddresses = throwable.getStackTraceAddresses(),
+                        location = sourceLocation
+                    ),
+                    // pass the error through the XCTest to the NativeTestObserver
+                    associatedError = NSErrorWithKotlinException(throwable),
+                    attachments = listOf(stackTraceAttachment)
+                )
             )
-            testRun?.recordIssue(issue) ?: error("TestRun for the test $testName not found")
         }
     }
 
@@ -130,6 +132,10 @@ class XCTestCaseWrapper(invocation: NSInvocation, val testCase: TestCase) : XCTe
                 with selector @sel(${NSStringFromSelector(invocation?.selector)})
                 """.trimIndent()
             )
+        }
+
+        override fun testCaseWithSelector(selector: SEL): XCTestCase? {
+            return super.testCaseWithSelector(selector)
         }
 
         /**

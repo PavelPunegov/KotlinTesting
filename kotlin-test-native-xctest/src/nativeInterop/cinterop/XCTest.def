@@ -14,6 +14,6 @@ foreignExceptionMode = objc-wrap
 static IMP skipImplementation() {
     return imp_implementationWithBlock(^void(id _self, SEL _sel) {
         // Use the XCTSkip function to skip the test with the provided reason
-        XCTSkip(@"Test was skipped (ignored with @Ignore annotation)");
+        XCTSkip(@"Test method or class was ignored with @Ignore annotation");
     });
 }
