@@ -84,7 +84,7 @@ class XCTestCaseWrapper(invocation: NSInvocation, val testCase: TestCase) : XCTe
             recordIssue(
                 XCTIssue(
                     type = type,
-                    compactDescription = "$throwable in $testName",
+                    compactDescription = throwable.toString(),
                     detailedDescription = buildString {
                         append("Test '${this@XCTestCaseWrapper.testName}'")
                         appendLine("from '${this@XCTestCaseWrapper.testCase.suite.name}' failed with $throwable")
