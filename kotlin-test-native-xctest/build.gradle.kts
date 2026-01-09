@@ -1,5 +1,9 @@
+import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinUsages
+import org.jetbrains.kotlin.gradle.tasks.CInteropProcess
 import org.jetbrains.kotlin.konan.target.*
+import java.io.ByteArrayOutputStream
 
 description = "XCTest wrapper of Native kotlin.test"
 
@@ -29,6 +33,7 @@ fun registerCopyFrameworkTask(target: KonanTarget): TaskProvider<Sync> =
             }
         ) {
             include("XCTest.framework/**")
+            include("XCUIAutomation.framework/**")
         }
     }
 
@@ -51,7 +56,7 @@ kotlin {
 
         forEach {
             val copyTask = registerCopyFrameworkTask(it.konanTarget)
-            it.compilations.all {
+            it.compilations.named("main") {
                 cinterops {
                     register("XCTest") {
                         compilerOpts("-iframework", copyTask.map { it.destinationDir }.get().absolutePath)
@@ -75,6 +80,40 @@ kotlin {
             optIn("kotlinx.cinterop.BetaInteropApi")
             optIn("kotlinx.cinterop.ExperimentalForeignApi")
             optIn("kotlin.experimental.ExperimentalNativeApi")
+        }
+    }
+}
+
+// endregion
+// region Artifact collection for consumers
+
+nativeTargets.forEach { target ->
+    val targetName = target.konanTarget.name
+    val kotlinTestNativeXCTest = configurations.create("kotlinTestNativeXCTest$targetName") {
+        attributes {
+            attribute(Usage.USAGE_ATTRIBUTE, objects.named(KotlinUsages.KOTLIN_API))
+            attribute(KotlinPlatformType.attribute, KotlinPlatformType.native)
+            attribute(KotlinNativeTarget.konanTargetAttribute, targetName)
+        }
+    }
+    val mainCompilation = target.compilations.getByName("main")
+    val outputKlibTask = mainCompilation.compileTaskProvider
+
+    @Suppress("UNCHECKED_CAST")
+    val cinteropKlibTask = tasks.named(
+        mainCompilation.cinterops
+            .getByName("XCTest")
+            .interopProcessingTaskName
+    ) as? TaskProvider<CInteropProcess> ?: error("Unable to get CInteropProcess task provider")
+
+    artifacts {
+        add(kotlinTestNativeXCTest.name, outputKlibTask.flatMap { it.outputFile }) {
+            classifier = targetName
+            builtBy(outputKlibTask)
+        }
+        add(kotlinTestNativeXCTest.name, cinteropKlibTask.flatMap { it.outputFileProvider }) {
+            classifier = targetName
+            builtBy(cinteropKlibTask)
         }
     }
 }
