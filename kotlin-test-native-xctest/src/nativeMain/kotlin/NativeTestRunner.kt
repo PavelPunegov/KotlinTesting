@@ -32,19 +32,7 @@ class XCTestCaseWrapper(invocation: NSInvocation, val testCase: TestCase) : XCTe
     private val testName = testCase.fullName
 
     fun run() {
-        check (!ignored) {
-            // In general, to skip the test `XCTSkip()` should be used,
-            // but it is not possible due to the KT-43719 and not implemented exception importing.
-            // To overcome this issue, we use a native `skipImplementation` method that returns an implementation
-            // that invokes `XCTSkip()`
-            """
-                Test $testName should be ignored and not run with this method.
-                The test machinery failed to replace runner with the special method.
-                Debug info:
-                - selector: ${invocation?.selector}
-                - signature: ${invocation?.methodSignature}
-            """.trimIndent()
-        }
+        checkNotIgnored()
         try {
             testCase.doRun()
         } catch (throwable: Throwable) {
@@ -64,7 +52,7 @@ class XCTestCaseWrapper(invocation: NSInvocation, val testCase: TestCase) : XCTe
                 XCTSourceCodeLocation(testCase.suite.name, 0L)
             }
 
-            // Make stack trace attachment, encoding it as source code.
+            // Make a stack trace attachment, encoding it as source code.
             // This makes it appear as an attachment in the XCode test results for the failed test.
             @Suppress("CAST_NEVER_SUCCEEDS")
             val stackAsPayload = (stackTrace.joinToString("\n") as? NSString)?.dataUsingEncoding(NSUTF8StringEncoding)
@@ -100,6 +88,20 @@ class XCTestCaseWrapper(invocation: NSInvocation, val testCase: TestCase) : XCTe
                 )
             )
         }
+    }
+
+    private fun checkNotIgnored() = check(!ignored) {
+        // In general, to skip the test `XCTSkip()` should be used,
+        // but it is not possible due to the KT-43719 and not implemented exception importing.
+        // To overcome this issue, we use a native `skipImplementation` method that returns an implementation
+        // that invokes `XCTSkip()`
+        """
+            Test $testName should be ignored and not run with this method.
+            The test machinery failed to replace runner with the special method.
+            Debug info:
+            - selector: ${invocation?.selector}
+            - signature: ${invocation?.methodSignature}
+        """.trimIndent()
     }
 
     override fun setUp() {

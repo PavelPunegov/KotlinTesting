@@ -1,5 +1,5 @@
 [versions]
-kotlin = "2.1.0"
+kotlin = "2.2.21"
 
 [libraries]
 kotlin-native-utils = { group = "org.jetbrains.kotlin", name = "kotlin-native-utils", version.ref = "kotlin" }
