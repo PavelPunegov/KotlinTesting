@@ -102,8 +102,8 @@ healthcheck() {
   log "healthcheck: java/gradle versions"
   java -version 2>&1 | head -1
   gradle --version | grep -E '^Gradle|^Kotlin|^Launcher JVM'
-  log "healthcheck: build convention plugins and configure :kotlin-test-native-xctest"
-  gradle_run :kotlin-test-native-xctest:tasks --all >/tmp/kotlintesting-healthcheck.log 2>&1 || {
+  log "healthcheck: build convention plugins and configure :kotlin-test-native-xctest, fetch Kotlin Native toolchain"
+  gradle_run :kotlin-test-native-xctest:tasks --all :kotlin-test-native-xctest:commonizeNativeDistribution >/tmp/kotlintesting-healthcheck.log 2>&1 || {
     tail -50 /tmp/kotlintesting-healthcheck.log; log "healthcheck FAILED"; return 1; }
   grep -q 'iosSimulatorArm64Test' /tmp/kotlintesting-healthcheck.log || {
     tail -50 /tmp/kotlintesting-healthcheck.log; log "healthcheck FAILED: KMP targets not configured"; return 1; }
