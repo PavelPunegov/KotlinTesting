@@ -70,6 +70,30 @@ done
 # shellcheck disable=SC1090
 . "$ENV_FILE"
 
+# --- JVM proxy: the egress proxy is only exposed as HTTPS_PROXY/HTTP_PROXY, which the Gradle JVM
+# ignores. Mirror it into ~/.gradle/gradle.properties (managed block, rewritten on every boot).
+GRADLE_PROPS="$HOME/.gradle/gradle.properties"
+mkdir -p "$HOME/.gradle"
+touch "$GRADLE_PROPS"
+sed -i '/^# >>> kotlintesting-proxy/,/^# <<< kotlintesting-proxy/d' "$GRADLE_PROPS"
+proxy_url="${HTTPS_PROXY:-${https_proxy:-${HTTP_PROXY:-${http_proxy:-}}}}"
+if [ -n "$proxy_url" ]; then
+  hostport="${proxy_url#*://}"; hostport="${hostport##*@}"; hostport="${hostport%%/*}"
+  proxy_host="${hostport%%:*}"; proxy_port="${hostport##*:}"
+  [ "$proxy_port" != "$hostport" ] || proxy_port=80
+  non_proxy="$(echo "${NO_PROXY:-${no_proxy:-localhost,127.0.0.1}}" | tr ',' '|')"
+  log "Configuring Gradle JVM proxy $proxy_host:$proxy_port"
+  cat >> "$GRADLE_PROPS" <<EOF
+# >>> kotlintesting-proxy (managed by .air/cloud/startup.sh)
+systemProp.http.proxyHost=$proxy_host
+systemProp.http.proxyPort=$proxy_port
+systemProp.https.proxyHost=$proxy_host
+systemProp.https.proxyPort=$proxy_port
+systemProp.http.nonProxyHosts=$non_proxy
+# <<< kotlintesting-proxy
+EOF
+fi
+
 gradle_run() {
   (cd "$REPO_DIR" && gradle --console=plain --configure-on-demand "$@")
 }
