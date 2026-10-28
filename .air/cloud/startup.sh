@@ -2,7 +2,7 @@
 # Air cloud environment startup for kotlintesting (Kotlin Multiplatform / Kotlin Native XCTest).
 #
 # NOTE: the real targets (macOS/iOS + XCTest) need macOS with Xcode. On this Linux
-# environment we provision JDK 21 + Gradle, build the convention plugins, configure the
+# environment we provision JDK 21 (launcher; Gradle provisions JDK 25 for the daemon/toolchain) + Gradle, build the convention plugins, configure the
 # :kotlin-test-native-xctest module and prime the Gradle / Kotlin Native (~/.konan) caches.
 # The :frameworkTesting module cannot be configured on Linux (it resolves Xcode SDK paths at
 # configuration time), so use `gradle --configure-on-demand :kotlin-test-native-xctest:<task>`.
@@ -14,7 +14,7 @@ REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 OPT_DIR="$HOME/.local/opt"
 BIN_DIR="$HOME/.local/bin"
 JDK_DIR="$OPT_DIR/jdk-21"
-GRADLE_VERSION=8.14.3
+GRADLE_VERSION=9.8.2
 GRADLE_DIR="$OPT_DIR/gradle-$GRADLE_VERSION"
 ENV_FILE="$HOME/.kotlintesting-env.sh"
 
@@ -27,7 +27,7 @@ curl_dl() {
 
 mkdir -p "$OPT_DIR" "$BIN_DIR"
 
-# --- JDK 21 (Gradle 8.14 Kotlin DSL does not run on newer JDKs; convention plugins use jvmToolchain(21))
+# --- JDK 21 launcher JVM (daemon runs on JDK 25 per gradle/gradle-daemon-jvm.properties, auto-provisioned via foojay)
 if [ ! -x "$JDK_DIR/bin/java" ]; then
   log "Installing Temurin JDK 21..."
   tmp="$(mktemp -d)"
@@ -38,7 +38,7 @@ if [ ! -x "$JDK_DIR/bin/java" ]; then
 fi
 log "JDK: $("$JDK_DIR/bin/java" -version 2>&1 | grep -m1 -i 'runtime' || true)"
 
-# --- Gradle (repository ships gradlew but no gradle/wrapper files)
+# --- Gradle (matches gradle/wrapper/gradle-wrapper.properties)
 if [ ! -x "$GRADLE_DIR/bin/gradle" ]; then
   log "Installing Gradle $GRADLE_VERSION..."
   tmp="$(mktemp -d)"
