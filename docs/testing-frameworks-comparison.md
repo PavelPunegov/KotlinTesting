@@ -91,7 +91,7 @@ Legend used in the tables: **✅** built in · **🟡** partial / limited / expe
 |---|---|---|---|---|
 | Runtime‑generated tests | 🟡 only via parameterization | ✅ override `class var defaultTestSuite` / `testInvocations` (how this repo injects Kotlin tests) | ❌ | ✅ `@TestFactory` → `DynamicTest`/`DynamicContainer` streams |
 | Test templates | 🟡 traits | ❌ | ❌ | ✅ `@TestTemplate` + `TestTemplateInvocationContextProvider`, `@ClassTemplate` (5.13) |
-| Custom test engines | ❌ (no public registration ABI; discovery is metadata‑driven) | ✅ XCTest objects can be created programmatically | 🟡 JS: `FrameworkAdapter`/`setAdapter`; Native/JVM: none public | ✅ `TestEngine` SPI, `EngineTestKit` |
+| Custom test engines | 🟡 open test‑content record format in `__swift5_tests`, but records must yield Swift `Test` values ([internals](swift-testing-internals.md)) | ✅ XCTest objects can be created programmatically | 🟡 JS: `FrameworkAdapter`/`setAdapter`; Native/JVM: none public | ✅ `TestEngine` SPI, `EngineTestKit` |
 
 ### 2.6 Asynchronous and concurrent code
 

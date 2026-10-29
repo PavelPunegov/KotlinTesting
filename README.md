@@ -36,4 +36,5 @@ xcrun xcresulttool get test-results summary --path <PATH_TO_XCRESULT>
 ## Documentation
 
 - [Swift Testing vs XCTest vs kotlin.test vs JUnit 5/6 — capability comparison](docs/testing-frameworks-comparison.md): API comparison by area, the list of features missing in `kotlin.test`, what `kotlin.test` provides on each Kotlin Multiplatform target, and a survey of other Kotlin testing libraries.
+- [Swift Testing internals](docs/swift-testing-internals.md): how Swift Testing builds on XCTest bundles, discovers tests from compile-time records in the `__swift5_tests` section instead of the Objective-C runtime, how xcodebuild and SwiftPM run it, and how XCTest interop works.
 - [Development plan](docs/development-plan.md): target architecture (JUnit Platform engine on Kotlin/JVM, XCTest backend for Apple targets), feature roadmap, phases, maturity checklist and risks.

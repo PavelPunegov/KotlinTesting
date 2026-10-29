@@ -12,7 +12,7 @@
 
 "Mature and feature complete" is defined in §7 as a checklist derived from the gap table in the comparison (§3 there). In short: parity with the P0/P1 features of Swift Testing and JUnit Jupiter, uniform behaviour on every target, stable public API, and tooling integration that does not require hand‑written glue.
 
-**Non‑goals (for 1.0).** UI automation (XCUITest/Compose `uiTest` stay separate), performance metrics beyond timing, mocking, assertion‑library competition (we remain assertion‑agnostic), replacing Kotest/TestBalloon as a DSL (we offer an annotation API first and a DSL second), Swift Testing as an execution backend (tracked as a stretch goal — Swift Testing has no supported registration ABI for non‑Swift tests, see §8).
+**Non‑goals (for 1.0).** UI automation (XCUITest/Compose `uiTest` stay separate), performance metrics beyond timing, mocking, assertion‑library competition (we remain assertion‑agnostic), replacing Kotest/TestBalloon as a DSL (we offer an annotation API first and a DSL second), Swift Testing as an execution backend (tracked as a stretch goal — its test content record format is open, but a `'test'` record must produce a Swift `Testing.Test` value, so a backend needs a generated Swift shim; see §8 and [Swift Testing internals](swift-testing-internals.md) §7).
 
 ## 2. Where the repository stands today
 
@@ -218,7 +218,7 @@ D1 self‑test suite with golden event streams per backend · D2 binary‑compat
 | ObjC runtime tricks (`class_addMethod`, IMP blocks, `NSInvocation`) | Xcode changes could reject dynamically created test classes | Covered by meta‑tests on every Xcode beta; alternative path: generated ObjC/Swift stubs per test at build time |
 | Kotlin/Native cannot catch ObjC exceptions (KT‑43719) → `XCTSkip` workaround | Skips may misbehave | Keep native IMP; follow KT‑43719; wrap in `foreignExceptionMode = objc-wrap` |
 | Apple de‑emphasises XCTest in favour of Swift Testing | Backend could become legacy | XCTest remains the only API for UI/performance and the interop target (ST‑0021); design event model to match Swift Testing ABI v0 so a future Swift Testing backend is incremental |
-| Swift Testing has no public registration ABI for non‑Swift tests | Cannot be a backend today | Track swift‑testing evolution; prototype emitting test‑content metadata records; meanwhile use XCTest interop in Xcode 27 |
+| Swift Testing records (`__swift5_tests`) must yield Swift `Testing.Test` values | No pure‑Kotlin Swift Testing backend | Prototype a build‑time generated Swift `@Test` shim per Kotlin test; optionally emit Kotlin‑specific FourCC records in the same section for tooling; meanwhile rely on XCTest + ST‑0021 interop (see [internals](swift-testing-internals.md)) |
 | Kotlin Gradle plugin internals (`-tr`, `KotlinNativeTest`, test task wiring) change | Gradle integration breaks | Depend only on public KGP DSL; register our own tasks; integration tests against KGP versions |
 | Threading constraints in XCTest (main thread, `continueAfterFailure`) vs coroutine tests | Deadlocks/flakiness | Executor runs on XCTest thread, offers `Dispatchers.Main` test dispatcher; documented rules |
 | Scope creep towards Kotest/TestBalloon feature sets | Delays 1.0 | Gap‑table priorities drive phases; DSL is layered on the annotation model, not the reverse |
