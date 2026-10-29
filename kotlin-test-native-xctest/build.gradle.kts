@@ -48,9 +48,7 @@ fun MutableList<KotlinNativeTarget>.addIfEnabledOnHost(target: KotlinNativeTarge
 
 kotlin {
     with(nativeTargets) {
-        addIfEnabledOnHost(macosX64())
         addIfEnabledOnHost(macosArm64())
-        addIfEnabledOnHost(iosX64())
         addIfEnabledOnHost(iosArm64())
         addIfEnabledOnHost(iosSimulatorArm64())
 
