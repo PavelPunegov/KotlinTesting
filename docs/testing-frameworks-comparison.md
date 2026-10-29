@@ -287,7 +287,7 @@ Items that `kotlin.test` does provide and that are competitive: a compact, stabl
 
 ### 5.6 Takeaways for KotlinTesting
 
-* The gaps in §3 are being filled piecemeal by **compiler plugins** (Burst, TestBalloon, Mokkery, Power‑assert) rather than by `kotlin.test` itself — compile‑time metadata is the only discovery mechanism that works on every Kotlin target.
+* The gaps in §3 are being filled piecemeal by **compile‑time code generation** — compiler plugins (Burst, TestBalloon, Mokkery, Power‑assert) or KSP (Kotest 6, Mockative, MocKMP) — rather than by `kotlin.test` itself. Compile‑time metadata is the only discovery mechanism that works on every Kotlin target; KotlinTesting uses KSP for non‑JVM targets and Jupiter reflection on the JVM (see the [development plan](development-plan.md), §9).
 * No library offers an **XCTest execution backend**: Kotest, TestBalloon and Burst all run on Apple targets through the Kotlin/Native stand‑alone runner, so none of them reaches devices, host‑app context or Xcode reports. This is the unique space for KotlinTesting.
 * The ecosystem expects a framework to be **assertion‑agnostic** (Kotest assertions, AssertK, Power‑assert must plug in) and **coroutine‑native** (`runTest`, Turbine).
 
