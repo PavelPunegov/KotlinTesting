@@ -19,8 +19,8 @@ abstract class XcodeSDKSource {
         }
 
         return when (this) {
-            KonanTarget.MACOS_ARM64, KonanTarget.MACOS_X64 -> xcode.macosxSdkPlatform
-            KonanTarget.IOS_SIMULATOR_ARM64, KonanTarget.IOS_X64 -> xcode.iphonesimulatorSdkPlatform
+            KonanTarget.MACOS_ARM64 -> xcode.macosxSdkPlatform
+            KonanTarget.IOS_SIMULATOR_ARM64 -> xcode.iphonesimulatorSdkPlatform
             KonanTarget.IOS_ARM64 -> xcode.iphoneosSdkPlatform
             else -> error("Target $this is not supported")
         }
